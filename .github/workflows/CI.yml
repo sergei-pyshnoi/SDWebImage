@@ -142,6 +142,7 @@ jobs:
         uses: actions/upload-artifact@v4.3.1
         with:
           name: test.png
+          path: ./
           
       - name: Code Coverage
         run: |
