@@ -93,7 +93,7 @@ jobs:
           xcodebuild build -workspace "${{ env.WORKSPACE_NAME }}" -scheme "SDWebImage Vision Demo" -destination "${{ env.visionOSDestination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO | xcpretty -c
   Test:
     name: Unit Test
-    runs-on: macos-14
+    runs-on: macos-14-large
     env:
       DEVELOPER_DIR: /Applications/Xcode_15.2.app
       WORKSPACE_NAME: SDWebImage.xcworkspace
@@ -134,9 +134,7 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build-for-testing -workspace "${{ env.WORKSPACE_NAME }}" -scheme "Tests ${{ matrix.scheme }}" -destination "${{ matrix.destination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO | xcpretty -c
-          xcodebuild test-without-building -workspace "${{ env.WORKSPACE_NAME }}" -scheme "Tests ${{ matrix.scheme }}" -destination "${{ matrix.destination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO &
-          sleep 60
-          screencapture test.png
+          xcodebuild test-without-building -workspace "${{ env.WORKSPACE_NAME }}" -scheme "Tests ${{ matrix.scheme }}" -destination "${{ matrix.destination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO
 
       - name: upload a Build Artifact
         uses: actions/upload-artifact@v4.3.1
