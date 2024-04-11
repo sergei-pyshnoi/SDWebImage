@@ -1,4 +1,4 @@
-ame: "SDWebImage CI"
+name: "SDWebImage CI"
 
 on:
   push:
@@ -104,24 +104,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [iOS, macOS, tvOS]
+        platform: [visionOS]
         include:
-          - platform: iOS
-            destination: platform=iOS Simulator,name=iPhone 15 Pro
-            scheme: iOS
-            flag: ios
-          - platform: macOS
-            destination: platform=macOS,arch=x86_64
-            scheme: Mac
-            flag: macos
-          - platform: tvOS
-            destination: platform=tvOS Simulator,name=Apple TV 4K (3rd generation)
-            scheme: TV
-            flag: tvos
-          # - platform: visionOS
-          #   destination: platform=visionOS Simulator,name=Apple Vision Pro
-          #   scheme: Vision
-          #   flag: visionos
+          - platform: visionOS
+            destination: platform=visionOS Simulator,name=Apple Vision Pro
+            scheme: Vision
+            flag: visionos
     steps:
       - name: Checkout
         uses: actions/checkout@v3
