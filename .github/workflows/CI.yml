@@ -97,7 +97,7 @@ jobs:
     name: Unit Test
     runs-on: macos-14
     env:
-      DEVELOPER_DIR: /Applications/Xcode_15.2.app
+      DEVELOPER_DIR: /Applications/Xcode_15.3.app
       WORKSPACE_NAME: SDWebImage.xcworkspace
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     # use matrix to generate jobs for each platform
@@ -151,7 +151,7 @@ jobs:
     name: Build Library
     runs-on: macos-14
     env:
-      DEVELOPER_DIR: /Applications/Xcode_15.2.app
+      DEVELOPER_DIR: /Applications/Xcode_15.3.app
       PROJECT_NAME: SDWebImage.xcodeproj
       SCHEME_NAME: SDWebImage
     steps:
