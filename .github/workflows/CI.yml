@@ -1,4 +1,4 @@
-name: "SDWebImage CI"
+ame: "SDWebImage CI"
 
 on:
   push:
@@ -87,13 +87,15 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build -workspace "${{ env.WORKSPACE_NAME }}" -scheme "SDWebImage Watch Demo" -destination "${{ env.watchOSDestination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO | xcpretty -c
+
       - name: Run demo for Vision
         run: |
           set -o pipefail
           xcodebuild build -workspace "${{ env.WORKSPACE_NAME }}" -scheme "SDWebImage Vision Demo" -destination "${{ env.visionOSDestination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO | xcpretty -c
+
   Test:
     name: Unit Test
-    runs-on: macos-14-large
+    runs-on: macos-14
     env:
       DEVELOPER_DIR: /Applications/Xcode_15.2.app
       WORKSPACE_NAME: SDWebImage.xcworkspace
@@ -102,14 +104,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [visionOS]
+        platform: [iOS, macOS, tvOS]
         include:
-          - platform: visionOS
-            destination: platform=visionOS Simulator,name=Apple Vision Pro
-            scheme: Vision
+          - platform: iOS
+            destination: platform=iOS Simulator,name=iPhone 15 Pro
+            scheme: iOS
+            flag: ios
+          - platform: macOS
+            destination: platform=macOS,arch=x86_64
+            scheme: Mac
+            flag: macos
+          - platform: tvOS
+            destination: platform=tvOS Simulator,name=Apple TV 4K (3rd generation)
+            scheme: TV
+            flag: tvos
+          # - platform: visionOS
+          #   destination: platform=visionOS Simulator,name=Apple Vision Pro
+          #   scheme: Vision
+          #   flag: visionos
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Install Cocoapods
         run: gem install cocoapods --no-document --quiet
@@ -127,27 +144,20 @@ jobs:
         run: |
           rm -rf ~/Library/Developer/Xcode/DerivedData/
           mkdir DerivedData
-      - if: ${{ matrix.platform }} == visionOS
-        run: xcrun simctl boot "Apple Vision Pro"
         
       - name: Run test
         run: |
           set -o pipefail
           xcodebuild build-for-testing -workspace "${{ env.WORKSPACE_NAME }}" -scheme "Tests ${{ matrix.scheme }}" -destination "${{ matrix.destination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO | xcpretty -c
           xcodebuild test-without-building -workspace "${{ env.WORKSPACE_NAME }}" -scheme "Tests ${{ matrix.scheme }}" -destination "${{ matrix.destination }}" -configuration Debug CODE_SIGNING_ALLOWED=NO
-
-      - name: upload a Build Artifact
-        uses: actions/upload-artifact@v4.3.1
-        with:
-          name: test.png
-          path: ./
+          mv ~/Library/Developer/Xcode/DerivedData/ "./DerivedData/${{ matrix.platform }}"
           
       - name: Code Coverage
         run: |
           set -o pipefail
           export PATH="/usr/local/opt/curl/bin:$PATH"
           curl --version
-          bash <(curl -s https://codecov.io/bash) -v -D "./DerivedData/${{ matrix.platform }}" -J '^SDWebImage$' -c -X gcov -F "${{ matrix.platform }}"
+          bash <(curl -s https://codecov.io/bash) -v -D "./DerivedData/${{ matrix.platform }}" -J '^SDWebImage$' -c -X gcov -F "${{ matrix.flag }}"
           
   Build:
     name: Build Library
@@ -169,11 +179,8 @@ jobs:
       - name: Build as static library
         run: |
           set -o pipefail
-          xcodebuild build -project "${{ env.PROJECT_NAME }}" -scheme "SDWebImage static" -sdk iphonesimulator PLATFORM_NAME=iphonesimulator -configuration Debug | xcpretty -c 
-
-
-          
-          
+          xcodebuild build -project "${{ env.PROJECT_NAME }}" -scheme "SDWebImage static" -sdk iphonesimulator PLATFORM_NAME=iphonesimulator -configuration Debug | xcpretty -c
+          rm -rf ~/Library/Developer/Xcode/DerivedData/
       - name: Build as dynamic frameworks
         run: |
           set -o pipefail
